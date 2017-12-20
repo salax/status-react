@@ -73,25 +73,45 @@
                                :group-chat group-chat
                                :current-public-key current-public-key)])
 
+
 (defview messages-view [group-chat]
   (letsubs [messages           [:get-current-chat-messages]
-            current-public-key [:get-current-public-key]]
-    [list/flat-list {:data                      messages
-                     :render-fn                 (fn [{:keys [message-id] :as message}]
-                                                  ^{:key message-id} [message-row {:group-chat         group-chat
-                                                                                   :current-public-key current-public-key
-                                                                                   :row                message}])
-                     :inverted                  true
-                     :onEndReached              #(re-frame/dispatch [:load-more-messages])
-                     :enableEmptySections       true
-                     :keyboardShouldPersistTaps (if platform/android? :always :handled)}]))
+            current-public-key [:get-current-public-key]
+            opacity            (anim/create-value 0)
+            duration           (if platform/android? 100 200)
+            timeout            (if platform/android? 50 0)
+            preview-style      {:flex            1
+                                :align-items     :center
+                                :justify-content :center}
+            preview            (vec [react/view preview-style])]
+    {:component-did-mount (fn [component]
+                            (js/setTimeout
+                             #(anim/start (anim/spring opacity {:toValue  1
+                                                                :duration duration}))
+                             timeout))}
+    (let [messages-cnt (count messages)]
+      [react/with-activity-indicator
+       {:style   preview-style
+        :preview preview}
+       [react/animated-view {:style {:opacity opacity
+                                     :flex    1}}
+        [list/flat-list {:data                      messages
+                         :render-fn                 (fn [{:keys [message-id] :as message}]
+                                                      ^{:key message-id} [message-row {:group-chat         group-chat
+                                                                                       :current-public-key current-public-key
+                                                                                       :row                message}])
+                         :inverted                  true
+                         :onEndReached              #(re-frame/dispatch [:load-more-messages])
+                         :enableEmptySections       true
+                         :keyboardShouldPersistTaps (if platform/android? :always :handled)}]]])))
 
 (defview chat []
-  (letsubs [{:keys [group-chat input-text]} [:get-current-chat]
-            show-actions?                   [:get-current-chat-ui-prop :show-actions?]
-            show-bottom-info?               [:get-current-chat-ui-prop :show-bottom-info?]
-            show-emoji?                     [:get-current-chat-ui-prop :show-emoji?]
-            layout-height                   [:get :layout-height]]
+  (letsubs [{:keys [chat-id group-chat input-text]} [:get-current-chat]
+            show-actions?                           [:get-current-chat-ui-prop :show-actions?]
+            show-bottom-info?                       [:get-current-chat-ui-prop :show-bottom-info?]
+            show-emoji?                             [:get-current-chat-ui-prop :show-emoji?]
+            layout-height                           [:get :layout-height]
+            current-view                            [:get :view-id]]
     {:component-did-mount    #(re-frame/dispatch [:check-and-open-dapp!])
      :component-will-unmount #(re-frame/dispatch [:set-chat-ui-props {:show-emoji? false}])}
     [react/view {:style style/chat-view
@@ -100,7 +120,8 @@
                                 (when (not= height layout-height)
                                   (re-frame/dispatch [:set-layout-height height]))))}
      [chat-toolbar]
-     [messages-view group-chat]
+     (when (= :chat current-view)
+       [messages-view group-chat])
      [input/container {:text-empty? (string/blank? input-text)}]
      (when show-actions?
        [actions/actions-view])

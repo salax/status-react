@@ -1,8 +1,8 @@
 (ns status-im.ui.screens.views
-  (:require-macros [status-im.utils.views :refer [defview letsubs]])
+  (:require-macros [status-im.utils.views :refer [defview letsubs] :as views])
   (:require [re-frame.core :refer [dispatch]]
             [status-im.utils.platform :refer [android?]]
-            [status-im.ui.components.react :refer [view modal]]
+            [status-im.ui.components.react :refer [view modal] :as react]
             [status-im.ui.components.styles :as common-styles]
             [status-im.ui.screens.main-tabs.views :refer [main-tabs]]
             [status-im.ui.components.context-menu :refer [menu-context]]
@@ -61,6 +61,36 @@
     current-view
     :chat))
 
+(views/compile-views
+  views-hierarchy
+  [{:views     #{:home :wallet :my-profile}
+    :component main-tabs}
+
+   {:view      :chat
+    :hide?     (not android?)
+    :component chat}
+
+   {:view      :wallet-send-transaction
+    :parent    :wallet
+    :component send-transaction}
+
+   {:view      :wallet-request-transaction
+    :parent    :wallet
+    :component request-transaction}
+
+   {:view      :choose-recipient
+    :parent    :wallet-send-transaction
+    :component choose-recipient}
+
+   {:view      :wallet-transaction-sent
+    :parent    :wallet-send-transaction
+    :component transaction-sent}
+
+
+   {:views     #{:transactions-history :unsigned-transactions}
+    :parent    :wallet
+    :component wallet-transactions/transactions}])
+
 (defview main []
   (letsubs [signed-up? [:signed-up?]
             view-id    [:get :view-id]
@@ -110,7 +140,13 @@
                           (throw (str "Unknown view: " current-view)))]
           [(if android? menu-context view) common-styles/flex
            [view common-styles/flex
-            [component]
+            (if (and signed-up?
+                     (#{:home :wallet :my-profile :chat :wallet-send-transaction
+                        :choose-recipient :wallet-transaction-sent :transactions-history
+                        :unsigned-transactions :wallet-request-transaction}
+                      current-view))
+              [views-hierarchy]
+              [component])
             (when modal-view
               [view common-styles/modal
                [modal {:animation-type   :slide
