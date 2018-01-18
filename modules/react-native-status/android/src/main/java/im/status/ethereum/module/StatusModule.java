@@ -181,7 +181,8 @@ class StatusModule extends ReactContextBaseJavaModule implements LifecycleEventL
             JSONObject jsonConfig = new JSONObject(config);
             String gethLogFileName = "geth.log";
             String dataDir = root + customConfig.get("DataDir");
-            String gethLogFilePath = "/sdcard/" + gethLogFileName;
+            String gethLogFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + gethLogFileName;
+            Log.d("ExtDirLog", gethLogFilePath);
             jsonConfig.put("LogEnabled", !TextUtils.isEmpty(this.logLevel));
             jsonConfig.put("LogFile", gethLogFilePath);
             jsonConfig.put("LogLevel", TextUtils.isEmpty(this.logLevel) ? "ERROR" : this.logLevel.toUpperCase());
