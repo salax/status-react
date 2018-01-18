@@ -1,53 +1,36 @@
 (ns status-im.ui.screens.profile.qr-code.styles
-  (:require [status-im.ui.components.styles :refer [color-white]]))
+  (:require [status-im.ui.components.styles :as styles]
+            [status-im.ui.components.colors :as colors]))
 
-(def photo-container
-  {:flex           0.2
-   :flexDirection  :column
-   :alignItems     :center
-   :justifyContent :center})
-
-(def account-photo-container
-  {:flex           1
-   :width          36
-   :height         36
-   :alignItems     :center
-   :justifyContent :center})
-
-(def qr-photo-container
-  (merge photo-container
-         {:margin-left  8
-          :margin-right 4}))
+(def qr-code-hint
+  {:color          styles/color-gray4
+   :padding-bottom 24
+   :text-align     :center})
 
 (defn qr-code-container [dimensions]
-  {:background-color "white"
+  {:background-color colors/white
    :width            (:width dimensions)
    :align-items      :center
    :justify-content  :center
    :padding          40})
 
-(def photo-image
-  {:width         36
-   :height        36
-   :border-radius 18})
-
 (def name-container
-  {:flex          1
-   :flexDirection :column})
+  {:flex           1
+   :flex-direction :column})
 
 (def name-text
-  {:color    color-white
-   :fontSize 16})
+  {:color     styles/color-black
+   :font-size 16})
 
 (def address-text
-  {:color    color-white
-   :fontSize 12})
+  {:color     colors/white
+   :font-size 12})
 
 (def online-container
-  {:flex           0.2
-   :flexDirection  :column
-   :alignItems     :center
-   :justifyContent :center})
+  {:flex            0.2
+   :flex-direction  :column
+   :align-items     :center
+   :justify-content :center})
 
 (def online-image-container
   {:width           40
@@ -61,43 +44,38 @@
    :flex-direction :column})
 
 (def account-toolbar
-  {:background-color "#2f3031"})
+  {:background-color colors/white})
 
 (def wallet-account-container
-  {:flex-grow      1
-   :flexDirection  :row
-   :height         69
-   :alignItems     :center
-   :justifyContent :center})
+  {:flex-grow       1
+   :flex-direction  :row
+   :height          69
+   :align-items     :center
+   :justify-content :center})
 
 (def qr-code
-  {:background-color "#2f3031"
+  {:background-color styles/color-light-gray
    :flex-grow        1
    :align-items      :center
    :justify-content  :center})
 
 (def footer
-  {:background-color "#2f3031"})
+  {:background-color styles/color-light-gray
+   :flex-direction   :row
+   :justify-content  :center})
 
 (def wallet-info
   {:align-items    :center
-   :padding-bottom 20
-   :padding-top    20})
+   :padding-bottom 20})
 
-(def wallet-name-text
-  {:color          color-white
+(def hash-value-type
+  {:color          styles/color-black
    :padding-bottom 5})
 
-(def wallet-address-text
-  {:color "#999999"})
-
-(def done-button
-  {:flex-grow        1
-   :flex-direction   :column
-   :align-items      :center
-   :justify-content  :center
-   :height           51
-   :background-color "#7597e4"})
+(def hash-value-text
+  {:color             styles/color-black
+   :margin-horizontal 60
+   :text-align        :center})
 
 (def done-button-text
-  {:color color-white})
+  {:color colors/white})

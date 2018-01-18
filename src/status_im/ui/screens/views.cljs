@@ -32,7 +32,7 @@
             [status-im.ui.screens.profile.views :refer [profile my-profile]]
             [status-im.ui.screens.profile.edit.views :refer [edit-my-profile]]
             [status-im.ui.screens.profile.photo-capture.views :refer [profile-photo-capture]]
-            [status-im.ui.screens.profile.qr-code.views :refer [qr-code-view]]
+            [status-im.ui.screens.profile.qr-code.views :refer [qr-viewer]]
 
             [status-im.ui.screens.wallet.send.views :refer [send-transaction send-transaction-modal]]
             [status-im.ui.screens.wallet.choose-recipient.views :refer [choose-recipient]]
@@ -107,6 +107,7 @@
                           :paste-json-text paste-json-text
                           :add-rpc-url add-rpc-url
                           :network-details network-details
+                          :qr-viewer qr-viewer
                           (throw (str "Unknown view: " current-view)))]
           [(if android? menu-context view) common-styles/flex
            [view common-styles/flex
@@ -118,7 +119,6 @@
                        :on-request-close #(dispatch [:navigate-back])}
                 (let [component (case modal-view
                                   :qr-scanner qr-scanner
-                                  :qr-code-view qr-code-view
                                   :recover-modal recover-modal
                                   :contact-list-modal contact-list-modal
                                   :wallet-transactions-filter wallet-transactions/filter-history

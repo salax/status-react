@@ -106,7 +106,7 @@
       styles/profile-info-item-button])])
 
 (defn show-qr [contact qr-source qr-value]
-  #(dispatch [:navigate-to-modal :qr-code-view {:contact   contact
+  #(dispatch [:navigate-to :qr-viewer {:contact   contact
                                                 :qr-source qr-source
                                                 :qr-value  qr-value}]))
 
