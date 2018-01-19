@@ -5,7 +5,9 @@
             [status-im.ui.components.icons.vector-icons :as vi]
             [status-im.ui.components.status-bar.view :as status-bar]
             [status-im.ui.components.list-selection :as list-selection]
-            [status-im.ui.screens.profile.qr-code.styles :as styles])
+            [status-im.ui.screens.profile.qr-code.styles :as styles]
+            [status-im.utils.platform :as platform]
+            [status-im.i18n :as i18n])
   (:require-macros [status-im.utils.views :refer [defview letsubs]]))
 
 
@@ -14,8 +16,12 @@
    [react/view styles/toolbar-contents
     [react/view styles/toolbar-action-container
      [react/touchable-highlight {:on-press #(re-frame/dispatch [:navigate-back])}
-      [react/view styles/toolbar-action-icon-container
-       [vi/icon :icons/close {:color :black}]]]]
+      (if platform/ios?
+        [react/view
+         [react/text {:style styles/toolbar-done-text-ios}
+         (i18n/label :t/done)]]
+        [react/view styles/toolbar-action-icon-container
+         [vi/icon :icons/close {:color :black}]])]]
     [react/view styles/name-container
      [react/text {:style           styles/name-text
                   :number-of-lines 1} name]]

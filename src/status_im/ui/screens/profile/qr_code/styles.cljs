@@ -19,9 +19,15 @@
    :padding          qr-code-padding
    :border-radius    10})
 
+(def toolbar-done-text-ios
+  {:color          colors/blue
+   :letter-spacing -0.2
+   :font-size      17})
+
 (defstyle name-container
   {:flex           0.7
    :flex-direction :column
+   :ios            {:align-items :center}
    :android        {:margin-left    15}})
 
 (defstyle name-text
@@ -70,7 +76,7 @@
   {:background-color styles/color-light-gray
    :flex-direction   :row
    :justify-content  :center
-   :padding-bottom   80})
+   :padding-bottom   50})
 
 (def wallet-info
   {:align-items    :center
