@@ -18,6 +18,7 @@
      [react/touchable-highlight {:on-press #(re-frame/dispatch [:navigate-back])}
       (if platform/ios?
         [react/view
+         ;;dummy commit
          [react/text {:style styles/toolbar-done-text-ios}
          (i18n/label :t/done)]]
         [react/view styles/toolbar-action-icon-container
