@@ -11,17 +11,17 @@
 
 (defn qr-viewer-toolbar [name qr-value]
   [react/view styles/account-toolbar
-   [react/view styles/wallet-account-container
-    [react/view styles/online-container
+   [react/view styles/toolbar-contents
+    [react/view styles/toolbar-action-container
      [react/touchable-highlight {:on-press #(re-frame/dispatch [:navigate-back])}
-      [react/view styles/online-image-container
+      [react/view styles/toolbar-action-icon-container
        [vi/icon :icons/close {:color :black}]]]]
     [react/view styles/name-container
      [react/text {:style           styles/name-text
                   :number-of-lines 1} name]]
-    [react/view styles/online-container
+    [react/view styles/toolbar-action-container
      [react/touchable-highlight {:on-press #(list-selection/open-share {:message qr-value})}
-      [react/view styles/online-image-container
+      [react/view styles/toolbar-action-icon-container
        [vi/icon :icons/share {:color :black}]]]]]])
 
 (defn qr-viewer-body [qr-value dimensions]
@@ -36,15 +36,12 @@
       [qr-code/qr-code {:value qr-value
                         :size  (- (min (:width dimensions)
                                        (:height dimensions))
-                                  80)}]])])
+                                  (* 2 styles/qr-code-padding))}]])])
 
-(defn qr-viewer-footer [qr-source qr-value]
+(defn qr-viewer-footer [qr-value]
   [react/view styles/footer
-   (if (= :address qr-source)
-     [react/view styles/wallet-info
-      [react/text {:style styles/hash-value-text} qr-value]]
-     [react/view styles/wallet-info
-      [react/text {:style styles/hash-value-text} qr-value]])])
+   [react/view styles/wallet-info
+    [react/text {:style styles/hash-value-text} qr-value]]])
 
 (defview qr-viewer []
   (letsubs [{:keys [qr-source qr-value dimensions contact]} [:get :qr-modal]]
@@ -52,4 +49,4 @@
      [status-bar/status-bar {:type :modal}]
      [qr-viewer-toolbar (:name contact) qr-value]
      [qr-viewer-body qr-value dimensions]
-     [qr-viewer-footer qr-source qr-value]]))
+     [qr-viewer-footer qr-value]]))
