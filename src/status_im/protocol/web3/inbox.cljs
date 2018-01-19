@@ -44,14 +44,36 @@
                                                   (swap! peers conj enode)
                                                   (success-fn result))))))
 
-(defn mark-trusted-peer [web3 enode success-fn error-fn]
+(defn extract-enode-id [enode]
+  (-> enode
+      env.utils/get-host
+      (string/split "@")
+      (get 0)))
+
+(defn registered-peer? [peers enode]
+  (->> enode
+       extract-enode-id
+       (contains?
+        (set (map :id peers)))))
+
+(defn mark-trusted-peer [web3 enode peers success-fn error-fn]
   (if (@trusted-peers enode)
     (success-fn true)
     (.markTrustedPeer (utils/shh web3)
-                      enode
-                      (response-handler error-fn (fn [result]
-                                                   (swap! trusted-peers conj enode)
-                                                   (success-fn result))))))
+                       enode
+                       (response-handler error-fn (fn [result]
+                                                    (swap! trusted-peers conj enode)
+                                                    (success-fn result))))))
+
+;; TODO(dmitryn): use web3 instead of rpc call
+(defn fetch-peers [success-fn error-fn]
+  (let [args {:jsonrpc "2.0"
+              :id 2
+              :method "admin_peers"
+              :params []}
+        payload (.stringify js/JSON (clj->js args))]
+    (status/call-web3 payload
+                      (response-handler error-fn success-fn))))
 
 (defn request-messages [web3 wnode topic sym-key-id success-fn error-fn]
   (log/info "offline inbox: sym-key-id" sym-key-id)
