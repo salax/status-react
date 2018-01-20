@@ -114,6 +114,38 @@ class StatusModule extends ReactContextBaseJavaModule implements LifecycleEventL
         this.getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("gethEvent", params);
     }
 
+    private String prepareLogsFile() {
+        String gethLogFileName = "geth.log";
+        File pubDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File logFile = new File(pubDirectory, gethLogFileName);
+
+        try {
+            logFile.setReadable(true);
+            File parent = logFile.getParentFile();
+            if (!parent.exists()) {
+                parent.mkdirs();
+            }
+            logFile.createNewFile();
+            logFile.setReadable(true);
+            Uri gethLogUri = Uri.fromFile(logFile);
+            try {
+                Log.d(TAG, "Attach to geth.log to instabug " + gethLogUri.getPath());
+                Instabug.setFileAttachment(gethLogUri, gethLogFileName);
+            } catch (NullPointerException e) {
+                Log.d(TAG, "Instabug is not initialized!");
+            }
+
+            String gethLogFilePath = logFile.getAbsolutePath();
+            Log.d("ExtDirLog", gethLogFilePath);
+
+            return gethLogFilePath;
+        } catch (Exception e) {
+            Log.d(TAG, "Can't create geth.log file! " + e.getMessage());
+        }
+
+        return null;
+    }
+
     private void doStartNode(final String defaultConfig) {
 
         Activity currentActivity = getCurrentActivity();
@@ -179,11 +211,11 @@ class StatusModule extends ReactContextBaseJavaModule implements LifecycleEventL
         try {
             JSONObject customConfig = new JSONObject(defaultConfig);
             JSONObject jsonConfig = new JSONObject(config);
-            String gethLogFileName = "geth.log";
+
+            String gethLogFilePath = prepareLogsFile();
+            boolean logsEnabled = (gethLogFilePath != null) && !TextUtils.isEmpty(this.logLevel);
             String dataDir = root + customConfig.get("DataDir");
-            String gethLogFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + gethLogFileName;
-            Log.d("ExtDirLog", gethLogFilePath);
-            jsonConfig.put("LogEnabled", !TextUtils.isEmpty(this.logLevel));
+            jsonConfig.put("LogEnabled", logsEnabled);
             jsonConfig.put("LogFile", gethLogFilePath);
             jsonConfig.put("LogLevel", TextUtils.isEmpty(this.logLevel) ? "ERROR" : this.logLevel.toUpperCase());
             jsonConfig.put("DataDir", dataDir);
@@ -198,25 +230,6 @@ class StatusModule extends ReactContextBaseJavaModule implements LifecycleEventL
 
             }
             jsonConfig.put("KeyStoreDir", newKeystoreDir);
-            File logFile = new File(gethLogFilePath);
-            try {
-                logFile.setReadable(true);
-                File parent = logFile.getParentFile();
-                if (!parent.exists()) {
-                    parent.mkdirs();
-                }
-                logFile.createNewFile();
-                logFile.setReadable(true);
-            } catch (Exception e) {
-                Log.d(TAG, "Can't create geth.log file!");
-            }
-            Uri gethLogUri = Uri.fromFile(logFile);
-            try {
-                Log.d(TAG, "Attach to geth.log to instabug " + gethLogUri.getPath());
-                Instabug.setFileAttachment(gethLogUri, gethLogFileName);
-            } catch (NullPointerException e) {
-                Log.d(TAG, "Instabug is not initialized!");
-            }
 
             config = jsonConfig.toString();
         } catch (JSONException e) {
